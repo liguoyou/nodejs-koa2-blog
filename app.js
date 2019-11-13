@@ -3,8 +3,17 @@ const app = new Koa()
 // const views = require('koa-views')
 const json = require('koa-json')
 const onerror = require('koa-onerror')
+
+// post data 数据解析
 const bodyparser = require('koa-bodyparser')
+
+// 日志
 const logger = require('koa-logger')
+
+// 文件操作
+const path = require('path')
+const fs = require('fs')
+const morgan = require('koa-morgan')
 
 // session redis
 const session = require('koa-generic-session')
@@ -36,6 +45,27 @@ app.use(async (ctx, next) => {
 	const ms = new Date() - start
 	console.log(`${ctx.method} ${ctx.url} - ${ms}ms`)
 })
+
+// 写日志
+const ENV = process.env.NODE_ENV
+if (ENV !== 'production') {
+	app.use(
+		morgan('dev', {
+			// stream: process.output // 默认
+		})
+	)
+} else {
+	// 生产环境
+	const logFileName = path.join(__dirname, 'logs', 'access.log')
+	const writeStream = fs.createWriteStream(logFileName, {
+		flags: 'a'
+	})
+	app.use(
+		morgan('combined', {
+			stream: writeStream
+		})
+	)
+}
 
 // 注册路由之前
 app.keys = ['LovEwAtER0807SHuiGeYOu.#']
