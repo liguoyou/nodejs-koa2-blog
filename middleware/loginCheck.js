@@ -1,11 +1,12 @@
 // 校验登录的中间件
 const { ErrorModel } = require('../model/resModel')
 
-module.exports = (req, res, next) => {
-  if (req.session.username) {
-    next()
-    return
-  }
+const loginCheck = async (ctx, next) => {
+	if (ctx.session && ctx.session.username) {
+		await next()
+		return
+	}
 
-  res.json(new ErrorModel('未登录'))
+	ctx.body = new ErrorModel('未登录')
 }
+module.exports = loginCheck
